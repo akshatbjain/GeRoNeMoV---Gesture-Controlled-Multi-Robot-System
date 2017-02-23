@@ -1,0 +1,130 @@
+
+VideoCapture webcam(1);
+webcam.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+webcam.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+
+Mat img;
+Mat img_hsv;
+Mat thresh_yellow;
+
+ofstream flagfile;
+ofstream number_egfile;
+ofstream mode_file;
+ofstream opfile;
+
+Point new_c = Point(-1, -1);
+Point old_c = Point(-1, -1);
+Point cnew_c = Point(-1, -1);
+Point cold_c = Point(-1, -1);
+
+
+void draw_and_save(int num)
+{
+	if (num > 0)
+	{
+		flagfile.open("C:/Users/ABHISHEK/Desktop/Abhishek Stuff/Robotics/Online Courses/Machine Learning/Programming Exercises/Week 5/mlclass-ex4-006/mlclass-ex4/BE Project/flag.txt");
+		flagfile << "0";
+		flagfile.close();
+		int y = num;
+		number_egfile.open("C:/Users/ABHISHEK/Desktop/Abhishek Stuff/Robotics/Online Courses/Machine Learning/Programming Exercises/Week 5/mlclass-ex4-006/mlclass-ex4/BE Project/num.txt");
+		number_egfile << y;
+		number_egfile.close();
+		mode_file.open("C:/Users/ABHISHEK/Desktop/Abhishek Stuff/Robotics/Online Courses/Machine Learning/Programming Exercises/Week 5/mlclass-ex4-006/mlclass-ex4/BE Project/MatOCV Comm/mode.txt");
+		mode_file << "1";
+		mode_file.close();
+		cout << "Enter Shape Index: \n1 = V\n2 = Rectangle\n3 = Circle\n4 = T\n5 = Inverted V\n6 = Line\nEnter choice: ";
+		cin >> y;
+		opfile.open("C:/Users/ABHISHEK/Desktop/Abhishek Stuff/Robotics/Online Courses/Machine Learning/Programming Exercises/Week 5/mlclass-ex4-006/mlclass-ex4/BE Project/output.txt");
+		opfile << y;
+		opfile.close();
+		cout << "\n\nSTART MATLAB acquire_dataset NOW!!!\n";
+		webcam.read(img);
+		Mat drawing1 = Mat::zeros(img.size(), CV_8UC1);
+		Mat drawing2 = Mat::zeros(img.size(), CV_8UC1);
+		Mat drawing3 = Mat::zeros(Size(20, 20), CV_8UC1);
+		Mat drawing4 = Mat::zeros(Size(20, 20), CV_8UC1);
+		namedWindow("Stream", CV_WINDOW_AUTOSIZE);
+		namedWindow("Yellow Blob", CV_WINDOW_AUTOSIZE);
+		namedWindow("XX", CV_WINDOW_AUTOSIZE);
+		namedWindow("YY", CV_WINDOW_AUTOSIZE);
+		for (int i = 0; i < num; i++)
+		{
+			clear_screen();
+			old_c = Point(-1, -1);
+			new_c = Point(-1, -1);
+			cold_c = Point(-1, -1);
+			cnew_c = Point(-1, -1);
+			drawing2 = Mat::zeros(img.size(), CV_8UC1);
+			drawing3 = Mat::zeros(Size(20, 20), CV_8UC1);
+			cout << "Draw Training Shapes here. \n\nNOTE: Press SPACE when done drawing. \n      Press and hold 'c' to clear drawing and redraw. \n\n";
+			cout << "Draw Training Shape No. " << i + 1 << ": " << endl;
+			//system("pause");
+
+			webcam.read(img);
+			webcam.read(img);
+			while (1)
+			{
+				webcam.read(img);
+				cvtColor(img, img_hsv, CV_BGR2HSV);
+				inRange(img_hsv, Scalar(minHG, minSG, minVG), Scalar(maxHG, maxSG, maxVG), thresh_yellow);
+				erode(thresh_yellow, thresh_yellow, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
+				dilate(thresh_yellow, thresh_yellow, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)));
+				dilate(thresh_yellow, thresh_yellow, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)));
+				erode(thresh_yellow, thresh_yellow, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
+				Moments mom = moments(thresh_yellow);
+				if (mom.m00 > size)
+				{
+					new_c = Point((mom.m10 / mom.m00), (mom.m01 / mom.m00));
+					cnew_c = Point((mom.m10 / (16 * mom.m00)), (mom.m01 / (12 * mom.m00)));
+					if (old_c.x > -1)
+					{
+						line(drawing2, new_c, old_c, Scalar(255), 3);
+						line(drawing3, cnew_c, cold_c, Scalar(255), 1);
+					}
+					old_c = new_c;
+					cold_c = cnew_c;
+				}
+				flip(drawing2, drawing1, 1);
+				flip(drawing3, drawing4, 1);
+				flip(img, img, 1);
+				flip(thresh_yellow, thresh_yellow, 1);
+				imshow("Stream", img);
+				imshow("Yellow Blob", drawing1);
+				imshow("YY", drawing4);
+				imshow("XX", thresh_yellow);
+				if (waitKey(10) == 32)
+				{
+					break;
+				}
+				if (waitKey(10) == 'c')
+				{
+					old_c = Point(-1, -1);
+					new_c = Point(-1, -1);
+					cold_c = Point(-1, -1);
+					cnew_c = Point(-1, -1);
+					drawing2 = Mat::zeros(img.size(), CV_8UC1);
+					drawing3 = Mat::zeros(Size(20, 20), CV_8UC1);
+				}
+			}
+			imwrite("C:/Users/ABHISHEK/Desktop/Abhishek Stuff/Robotics/Online Courses/Machine Learning/Programming Exercises/Week 5/mlclass-ex4-006/mlclass-ex4/BE Project/training_eg.jpg", drawing4);
+			/*opfile.open("C:/Users/ABHISHEK/Desktop/Abhishek Stuff/Robotics/Online Courses/Machine Learning/Programming Exercises/Week 5/mlclass-ex4-006/mlclass-ex4/BE Project/output.txt");
+			opfile << y;
+			opfile.close();*/
+			flagfile.open("C:/Users/ABHISHEK/Desktop/Abhishek Stuff/Robotics/Online Courses/Machine Learning/Programming Exercises/Week 5/mlclass-ex4-006/mlclass-ex4/BE Project/flag.txt");
+			flagfile << "1";
+			flagfile.close();
+		}
+	}
+}
+
+
+
+int main()
+{
+	cout << "You selected TRAINING MODE. \n\n Please calibrate camera for finger markers...";
+	calibrate_gesture_markers();
+	int numbers;
+	cout << "\nEnter Training Session Length (*No. of Training Examples*): ";
+	cin >> numbers;
+	draw_and_save(numbers);
+}

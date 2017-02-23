@@ -1,0 +1,39 @@
+close all;
+clear all;
+clc;
+
+start_file = fopen('MatOCV Comm\start.txt', 'wt');
+fprintf(start_file, '%d', 1);
+fclose(start_file);
+
+load('weights.mat');
+
+exit = 0;
+
+while(exit ~= 1)
+    pause(0.2);
+    mode = load('MatOCV Comm\mode.txt');
+    if(mode == 1)
+        acquire_dataset_fn();
+        mode_file = fopen('matOCV Comm\mode.txt', 'wt');
+        fprintf(mode_file, '%d', 0);
+        fclose(mode_file);
+    elseif(mode == 2)
+        recogniseGesture(Theta1, Theta2);
+    elseif(mode == 3)
+        exit_file = fopen('MatOCV Comm\exit.txt', 'wt');
+        fprintf(exit_file, '%d', 1);
+        fclose(exit_file);
+        mode_file = fopen('matOCV Comm\mode.txt', 'wt');
+        fprintf(mode_file, '%d', 0);
+        fclose(mode_file);
+    end
+    exit = load('MatOCV Comm\exit.txt');
+end
+
+start_file = fopen('MatOCV Comm\start.txt', 'wt');
+fprintf(start_file, '%d', 0);
+fclose(start_file);
+exit_file = fopen('MatOCV Comm\exit.txt', 'wt');
+fprintf(exit_file, '%d', 0);
+fclose(exit_file);
