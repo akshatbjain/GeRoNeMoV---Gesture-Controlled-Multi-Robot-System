@@ -18,4 +18,6 @@ The name GeRoNeMoV was inspired by the different domains that this project touch
 * V - Vision
 
 # Working demo
-![video](https://www.youtube.com/watch?v=bFPOc5xBzBI&feature=youtu.be)
+To watch GeRoNeMoV in action, click on the image below! 
+
+[![](https://github.com/akshatbjain/GeRoNeMoV---Gesture-Controlled-Multi-Robot-System/blob/master/GeRoNeMoV%20Sample%20Image.jpg)](https://www.youtube.com/watch?v=bFPOc5xBzBI&feature=youtu.be)
